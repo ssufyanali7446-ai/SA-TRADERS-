@@ -312,8 +312,9 @@ fun Mt5BridgeScreen(
                                 )
                             }
 
+                            val absPnl = kotlin.math.abs(order.pnl)
                             Text(
-                                text = "%+$%.2f".format(order.pnl),
+                                text = "${if (order.pnl >= 0) "+$" else "-$"}%.2f".format(absPnl),
                                 color = pnlColor,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold

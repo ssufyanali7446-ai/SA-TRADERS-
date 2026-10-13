@@ -304,8 +304,9 @@ fun BacktestScreen(
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(text = "NET PROFIT", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            val absProfit = kotlin.math.abs(result.netProfitDollars)
                             Text(
-                                text = "%+$%.2f".format(result.netProfitDollars),
+                                text = "${if (result.netProfitDollars >= 0) "+$" else "-$"}%.2f".format(absProfit),
                                 color = BullGreen,
                                 fontSize = 19.sp,
                                 fontWeight = FontWeight.ExtraBold
@@ -486,14 +487,15 @@ fun BacktestScreen(
                         }
 
                         Column(horizontalAlignment = Alignment.End) {
+                            val absPnl = kotlin.math.abs(trade.pnl)
                             Text(
-                                text = "%+$%.2f".format(trade.pnl),
+                                text = "${if (trade.pnl >= 0) "+$" else "-$"}%.2f".format(absPnl),
                                 color = if (trade.isWin) BullGreen else BearRed,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "%+%.1f%%".format(trade.pnlPercent),
+                                text = "${if (trade.pnlPercent >= 0) "+" else ""}%.1f%%".format(trade.pnlPercent),
                                 color = if (trade.isWin) BullGreenLight else BearRedLight,
                                 fontSize = 10.sp
                             )

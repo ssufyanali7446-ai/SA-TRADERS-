@@ -227,7 +227,7 @@ fun SignalCard(
                     Column(modifier = Modifier.padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = "MACD Hist", color = TextMuted, fontSize = 9.sp)
                         Text(
-                            text = "%+.2f".format(signal.indicators.macdHistogram),
+                            text = "${if (signal.indicators.macdHistogram >= 0) "+" else ""}%.2f".format(signal.indicators.macdHistogram),
                             color = if (signal.indicators.macdHistogram >= 0) BullGreen else BearRed,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
