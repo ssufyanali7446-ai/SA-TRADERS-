@@ -21,14 +21,16 @@ jobs:
         with:
           flutter-version: '3.19.x'
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Install dependencies & Build APK
+        run: |
+          if [ -d "app" ]; then
+            cd app
+          fi
+          flutter pub get
+          flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: '**/build/outputs/flutter-apk/app-release.apk'
