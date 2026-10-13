@@ -16,27 +16,22 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.19.x'
-
-      - name: Install dependencies
-        run: flutter pub get || true
-
-      - name: Build APK with Flutter or Gradle
+      - name: Build APK
         run: |
           if [ -f "pubspec.yaml" ]; then
+            uses: subosito/flutter-action@v2
             flutter build apk --release
-          else
+          elif [ -f "gradlew" ]; then
             chmod +x gradlew
             ./gradlew assembleDebug
+          else
+            chmod +x gradlew || true
+            find . -name gradlew -exec chmod +x {} +
+            find . -name gradlew -execdir ./gradlew assembleDebug \;
           fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            app/build/outputs/apk/debug/app-debug.apk
+          name: app-debug
+          path: '**/build/outputs/apk/**/*.apk'
