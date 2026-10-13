@@ -21,16 +21,39 @@ jobs:
         with:
           flutter-version: '3.19.x'
 
-      - name: Install dependencies & Build APK
+      - name: Build APK (Auto Detect)
         run: |
-          if [ -d "app" ]; then
-            cd app
+          set -e
+          echo "=== Searching for project files ==="
+          
+          # Find pubspec.yaml
+          PUBSPEC=$(find . -name "pubspec.yaml" -not -path "*/.*" | head -n 1)
+          
+          if [ -n "$PUBSPEC" ]; then
+            echo "Found Flutter project at: $PUBSPEC"
+            DIR=$(dirname "$PUBSPEC")
+            cd "$DIR"
+            flutter pub get
+            flutter build apk --release
+          else
+            echo "No pubspec.yaml found. Checking for Gradle..."
+            GRADLEW=$(find . -name "gradlew" -not -path "*/.*" | head -n 1)
+            if [ -n "$GRADLEW" ]; then
+              echo "Found gradlew at: $GRADLEW"
+              DIR=$(dirname "$GRADLEW")
+              cd "$DIR"
+              chmod +x gradlew
+              ./gradlew assembleDebug
+            else
+              echo "Error: Could not find Flutter or Gradle project files."
+              exit 1
+            fi
           fi
-          flutter pub get
-          flutter build apk --release
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: '**/build/outputs/flutter-apk/app-release.apk'
+          path: |
+            **/build/outputs/flutter-apk/*.apk
+            **/build/outputs/apk/**/*.apk
