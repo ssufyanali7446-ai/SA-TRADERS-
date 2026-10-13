@@ -21,14 +21,22 @@ jobs:
         with:
           flutter-version: '3.19.x'
 
-      - name: Build APK (Auto Detect)
+      - name: Auto Extract ZIP and Find Project Files
         run: |
           set -e
-          echo "=== Searching for project files ==="
-          
-          # Find pubspec.yaml
+          echo "=== Checking for ZIP files ==="
+          ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
+          if [ -n "$ZIP_FILE" ]; then
+            echo "Found ZIP file: $ZIP_FILE. Extracting..."
+            unzip -o "$ZIP_FILE" -d extracted_project
+          fi
+
+          echo "=== Listing Repository Structure ==="
+          find . -maxdepth 3 -not -path '*/.*'
+
+          echo "=== Searching for pubspec.yaml ==="
           PUBSPEC=$(find . -name "pubspec.yaml" -not -path "*/.*" | head -n 1)
-          
+
           if [ -n "$PUBSPEC" ]; then
             echo "Found Flutter project at: $PUBSPEC"
             DIR=$(dirname "$PUBSPEC")
@@ -36,7 +44,7 @@ jobs:
             flutter pub get
             flutter build apk --release
           else
-            echo "No pubspec.yaml found. Checking for Gradle..."
+            echo "No pubspec.yaml found. Checking for gradlew..."
             GRADLEW=$(find . -name "gradlew" -not -path "*/.*" | head -n 1)
             if [ -n "$GRADLEW" ]; then
               echo "Found gradlew at: $GRADLEW"
@@ -45,15 +53,13 @@ jobs:
               chmod +x gradlew
               ./gradlew assembleDebug
             else
-              echo "Error: Could not find Flutter or Gradle project files."
+              echo "ERROR: Neither Flutter nor Gradle project files exist."
               exit 1
             fi
           fi
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: |
-            **/build/outputs/flutter-apk/*.apk
-            **/build/outputs/apk/**/*.apk
+          name: app-build
+          path: '**/build/outputs/**/*.apk'
